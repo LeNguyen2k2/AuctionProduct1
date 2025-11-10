@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Quản lý đấu giá</title>
+  <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔧</text></svg>">
+  <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+  <div class="admin-container">
+    <h1>🎯 Admin - Quản lý đấu giá</h1>
+
+    <!-- Time Management Section -->
+    <section class="time-management">
+      <h2>⏰ Quản lý thời gian đấu giá</h2>
+      <div class="time-controls">
+        <div class="time-input-group">
+          <label for="startTime">Thời gian bắt đầu:</label>
+          <input type="datetime-local" id="startTime">
+        </div>
+        <div class="time-input-group">
+          <label for="endTime">Thời gian kết thúc:</label>
+          <input type="datetime-local" id="endTime">
+        </div>
+        <div class="time-buttons">
+          <button class="btn-save" id="saveTimeBtn">💾 Lưu thời gian</button>
+          <button class="btn-reset" id="resetTimeBtn">🔄 Reset</button>
+        </div>
+      </div>
+      <div class="auction-status">
+        <p><strong>Trạng thái:</strong> <span id="auctionStatus" class="status-badge status-not-set">Đang tải...</span></p>
+        <p><strong>Bắt đầu:</strong> <span id="currentStartTime">-</span></p>
+        <p><strong>Kết thúc:</strong> <span id="currentEndTime">-</span></p>
+      </div>
+    </section>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="productsTab">📦 Danh sách sản phẩm</button>
+      <button class="tab-btn" data-tab="addProductTab">➕ Thêm sản phẩm</button>
+      <button class="tab-btn" data-tab="historyTab">📊 Lịch sử đấu giá</button>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="productsTab" class="tab-content active">
+      <h2>📦 Danh sách sản phẩm</h2>
+      <div class="table-wrapper">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Tên sản phẩm</th>
+              <th>Giá khởi điểm</th>
+              <th>Giá hiện tại</th>
+              <th>Người đấu giá</th>
+              <th>IP</th>
+              <th>Hình ảnh</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" style="text-align:center;padding:20px;">Đang tải dữ liệu...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add Product Tab -->
+    <div id="addProductTab" class="tab-content">
+      <h2>➕ Thêm sản phẩm mới</h2>
+      <form id="formAdd" class="add-product-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="addTenProduct">Tên sản phẩm:</label>
+            <input type="text" id="addTenProduct" name="tenProduct" required placeholder="Nhập tên sản phẩm">
+          </div>
+          
+          <div class="form-group">
+            <label for="addGiaKhoiDiem">Giá khởi điểm (VNĐ):</label>
+            <input type="number" id="addGiaKhoiDiem" name="giaKhoiDiem" required placeholder="0" min="0">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="addMoTa">Mô tả:</label>
+          <textarea id="addMoTa" name="moTa" rows="5" placeholder="Nhập mô tả sản phẩm"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="addHinhAnh">Hình ảnh (tối đa 4 ảnh):</label>
+          <div class="file-upload-area">
+            <input type="file" id="addHinhAnh" name="hinhAnh" multiple accept="image/*" class="file-input">
+            <div class="file-upload-label">
+              <i class="icon">📁</i>
+              <p>Chọn ảnh hoặc kéo thả vào đây</p>
+              <span class="file-upload-hint">Hỗ trợ: JPG, PNG, GIF (Tối đa 4 ảnh)</span>
+            </div>
+            <div id="imagePreview" class="image-preview"></div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-submit">➕ Thêm sản phẩm</button>
+      </form>
+    </div>
+
+    <!-- History Tab -->
+    <div id="historyTab" class="tab-content">
+      <h2>📊 Lịch sử đấu giá</h2>
+      
+      <!-- Export Button -->
+      <button id="exportExcelBtn" class="btn-export">📥 Xuất Excel</button>
+      
+      <!-- History Table -->
+      <div class="table-wrapper">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Sản phẩm</th>
+              <th>Người đấu giá</th>
+              <th>Giá đấu</th>
+              <th>IP Address</th>
+              <th>Thời gian</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6" style="text-align:center;padding:20px;">Chưa có lịch sử đấu giá</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="pagination">
+        <button id="btnPrevPage" class="btn-page">⬅️ Trang trước</button>
+        <span id="pageInfo">Trang 1 / 1</span>
+        <button id="btnNextPage" class="btn-page">Trang sau ➡️</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-body detail-modal-body">
+      <button class="detail-close-btn" id="editClose">✖ Đóng</button>
+      <h3 class="modal-auction-title-black">✏️ Chỉnh sửa sản phẩm</h3>
+      
+      <div class="detail-flexbox-fix">
+        <!-- Left: Images -->
+        <div class="detail-imgbox-fix">
+          <div class="current-image-container">
+            <img id="editImg" src="/uploads/placeholder.png" alt="Product Image">
+            <p class="image-label">Ảnh hiện tại</p>
+          </div>
+          <div id="editImgSlider" class="detail-img-slider"></div>
+        </div>
+        
+        <!-- Right: Form -->
+        <div class="detail-infoarea-fix">
+          <form id="formEdit">
+            <input type="hidden" id="editId">
+            
+            <div class="form-group">
+              <label for="editTen">📦 Tên sản phẩm:</label>
+              <input type="text" id="editTen" name="tenProduct" required placeholder="Nhập tên sản phẩm">
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="editGiaKhoiDiem">💵 Giá khởi điểm (VNĐ):</label>
+                <input type="number" id="editGiaKhoiDiem" name="giaKhoiDiem" required placeholder="0" min="0">
+              </div>
+              
+              <div class="form-group">
+                <label for="editGiaHienTai">💰 Giá hiện tại (VNĐ):</label>
+                <input type="number" id="editGiaHienTai" name="giaHienTai" placeholder="0" min="0">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="editNguoiDauGia">👤 Người đấu giá:</label>
+              <input type="text" id="editNguoiDauGia" name="tenNguoiDauGia" placeholder="Tên người đấu giá">
+            </div>
+            
+            <div class="form-group">
+              <label for="editMoTa">📝 Mô tả:</label>
+              <textarea id="editMoTa" name="moTa" rows="4" placeholder="Nhập mô tả sản phẩm"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="editHinhAnh">🖼️ Thay đổi hình ảnh (tối đa 4 ảnh):</label>
+              <div class="file-upload-area-edit">
+                <input type="file" id="editHinhAnh" name="hinhAnh" multiple accept="image/*" class="file-input">
+                <div class="file-upload-label">
+                  <i class="icon">📁</i>
+                  <p>Chọn ảnh mới để thay đổi</p>
+                  <span class="file-upload-hint">Hỗ trợ: JPG, PNG, GIF (Tối đa 4 ảnh)</span>
+                </div>
+                <div id="editImagePreview" class="image-preview"></div>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">💾 Lưu thay đổi</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Quản lý đấu giá</title>
+  <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔧</text></svg>">
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-gavel"></i>
+      <h2>Admin Panel</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-item active" data-section="dashboard">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#products" class="nav-item" data-section="products">
+        <i class="fas fa-box"></i>
+        <span>Sản phẩm</span>
+      </a>
+      <a href="#add-product" class="nav-item" data-section="add-product">
+        <i class="fas fa-plus-circle"></i>
+        <span>Thêm sản phẩm</span>
+      </a>
+      <a href="#statistics" class="nav-item" data-section="statistics">
+        <i class="fas fa-chart-bar"></i>
+        <span>Thống kê</span>
+      </a>
+      <a href="#settings" class="nav-item" data-section="settings">
+        <i class="fas fa-cog"></i>
+        <span>Cài đặt</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/" class="btn-back-home">
+        <i class="fas fa-home"></i>
+        <span>Về trang chủ</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="btn-toggle-sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 id="page-title">Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-stats">
+          <div class="stat-item">
+            <i class="fas fa-box"></i>
+            <span id="totalProducts">0</span>
+            <small>Sản phẩm</small>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-gavel"></i>
+            <span id="totalBids">0</span>
+            <small>Lượt đấu</small>
+          </div>
+        </div>
+        <div class="user-menu">
+          <img src="https://ui-avatars.com/api/?name=Admin&background=4CAF50&color=fff" alt="Admin">
+          <span>Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="content-section active">
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="stat-info">
+            <h3 id="dashTotalProducts">0</h3>
+            <p>Tổng sản phẩm</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fas fa-gavel"></i>
+          </div>
+          <div class="stat-info">
+            <h3 id="dashTotalBids">0</h3>
+            <p>Tổng lượt đấu</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stat-info">
+            <h3 id="dashTotalValue">0 VNĐ</h3>
+            <p>Tổng giá trị</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <i class="fas fa-fire"></i>
+          </div>
+          <div class="stat-info">
+            <h3 id="dashHotProducts">0</h3>
+            <p>Sản phẩm hot</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-activity">
+        <h2><i class="fas fa-history"></i> Hoạt động gần đây</h2>
+        <div class="activity-list" id="recentActivity">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products-section" class="content-section">
+      <div class="section-header">
+        <h2><i class="fas fa-box"></i> Danh sách sản phẩm</h2>
+        <div class="section-actions">
+          <button class="btn btn-success" onclick="exportStats()">
+            <i class="fas fa-file-excel"></i> Xuất Excel
+          </button>
+          <button class="btn btn-primary" onclick="refreshProducts()">
+            <i class="fas fa-sync-alt"></i> Làm mới
+          </button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table id="tbl" class="data-table">
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Tên sản phẩm</th>
+              <th>Giá khởi điểm</th>
+              <th>Giá hiện tại</th>
+              <th>Người đấu giá</th>
+              <th>IP cuối</th>
+              <th>Hình ảnh</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic content -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Add Product Section -->
+    <section id="add-product-section" class="content-section">
+      <div class="form-container">
+        <h2><i class="fas fa-plus-circle"></i> Thêm sản phẩm mới</h2>
+        <form id="formAdd" onsubmit="addProduct(event)" class="product-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label><i class="fas fa-tag"></i> Tên sản phẩm</label>
+              <input type="text" name="tenProduct" required placeholder="Nhập tên sản phẩm">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-dollar-sign"></i> Giá khởi điểm (VNĐ)</label>
+              <input type="number" name="giaKhoiDiem" required placeholder="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-align-left"></i> Mô tả</label>
+            <textarea name="moTa" rows="4" placeholder="Nhập mô tả sản phẩm"></textarea>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-image"></i> Hình ảnh (tối đa 4 ảnh)</label>
+            <div class="file-upload-wrapper">
+              <input type="file" name="hinhAnh" multiple accept="image/*" id="fileInput">
+              <label for="fileInput" class="file-upload-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Chọn ảnh hoặc kéo thả vào đây</span>
+              </label>
+              <div id="preview-container" class="preview-container"></div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-large">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section id="statistics-section" class="content-section">
+      <h2><i class="fas fa-chart-bar"></i> Thống kê chi tiết</h2>
+      <div class="stats-grid">
+        <div class="chart-card">
+          <h3>Biểu đồ giá đấu</h3>
+          <canvas id="priceChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Top sản phẩm hot</h3>
+          <div id="topProducts" class="top-products-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settings-section" class="content-section">
+      <h2><i class="fas fa-cog"></i> Cài đặt hệ thống</h2>
+      <div class="settings-container">
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Thời gian đấu giá</h3>
+            <p>Cấu hình thời gian bắt đầu và kết thúc đấu giá</p>
+          </div>
+          <button class="btn btn-secondary">Cấu hình</button>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Bước giá tối thiểu</h3>
+            <p>Đặt bước giá tối thiểu cho mỗi lần đấu</p>
+          </div>
+          <button class="btn btn-secondary">Cấu hình</button>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Email thông báo</h3>
+            <p>Cấu hình email nhận thông báo khi có đấu giá mới</p>
+          </div>
+          <button class="btn btn-secondary">Cấu hình</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-edit"></i> Chỉnh sửa sản phẩm</h2>
+        <button class="modal-close" id="editClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formEdit" onsubmit="updateProduct(event)" class="product-form">
+        <input type="hidden" id="editId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> Tên sản phẩm</label>
+            <input type="text" id="editTen" name="tenProduct" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-dollar-sign"></i> Giá khởi điểm</label>
+            <input type="number" id="editGiaKhoiDiem" name="giaKhoiDiem" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label><i class="fas fa-money-bill-wave"></i> Giá hiện tại</label>
+            <input type="number" id="editGiaHienTai" name="giaHienTai">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Người đấu giá</label>
+            <input type="text" id="editNguoiDauGia" name="tenNguoiDauGia">
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-align-left"></i> Mô tả</label>
+          <textarea id="editMoTa" name="moTa" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-image"></i> Hình ảnh hiện tại</label>
+          <div id="editImgs" class="current-images"></div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-upload"></i> Thay đổi hình ảnh</label>
+          <input type="file" name="hinhAnh" multiple accept="image/*">
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Lưu thay đổi
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+            <i class="fas fa-times"></i> Hủy
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
