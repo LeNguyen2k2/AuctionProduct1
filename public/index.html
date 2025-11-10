@@ -166,13 +166,13 @@
 <body>
 <header>
   <div class="header-content">
-    <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px;">
     <img src="icon/date-24.png" alt="icon đầu" style="height: 40px;">
-    MEGA LIVE RỰC CHÁY
+    MEGA SALE RỰC CHÁY
     <img src="icon/citad-logo.png" alt="icon cuối" style="height: 40px;">
     </h1>
-    <p>🌸 PHIÊN ĐẤU GIÁ SẢN PHẨM - GÓP QUỸ TỪ THIỆN 🌸</p>
-  <span id="totalPrice"></span>
+  <p>🌸 PHIÊN ĐẤU GIÁ SẢN PHẨM - GÓP QUỸ TỪ THIỆN 🌸</p>
+  <span id="totalPrice">Tổng Giá Hiện Tại: 21,002 VNĐ</span>
   </div>
 </header> 
 
@@ -209,7 +209,7 @@
     <div class="modal-body">
       <h2 id="modalTitle">Đấu giá</h2>
       <label>Tên:</label><input id="bidName" type="text"><br>
-      <label>Số tiền:</label><input id="bidAmount" type="number"><br>
+      <label>Số tiền:</label><input id="bidAmount" type="text" inputmode="numeric"><br>
       <div class="modal-buttons">
         <button id="bidOk">OK</button>
         <button id="bidCancel">Hủy</button>
@@ -231,9 +231,16 @@
         <div class="detail-infoarea-fix">
           <div class="detail-mota-fix" id="detailMoTa" style="font-size:1.08em; color:#2a7c2a; font-weight:500; margin-bottom:10px;"></div>
           <div class="detail-gia-fix">
-            <span>Giá khởi điểm: <b id="detailGiaKhoiDiem"></b></span><br>
-            <span>Giá hiện tại: <b id="detailGiaHienTai"></b></span>
+            <div class="gia-khoi-diem">
+              <span class="gia-label">💰 Giá khởi điểm:</span>
+              <span class="gia-value" id="detailGiaKhoiDiem"></span>
+            </div>
+            <div class="gia-hien-tai">
+              <span class="gia-label">🔥 Giá hiện tại:</span>
+              <span class="gia-value" id="detailGiaHienTai"></span>
+            </div>
           </div>
+          <h3 class="bidlist-title">📜 Lịch sử đấu giá</h3>
           <div class="detail-bidlist-fix detail-bidlist-large">
             <table id="detailTable">
               <thead>
@@ -261,6 +268,9 @@
     </div>
     <div class="zoom-image-indicator" id="zoomIndicator">1 / 1</div>
   </div>
+
+  <!-- 🔔 TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
 
 <footer>
   <img src="icon/footer_logo.png" alt="Logo" class="footer-logo">

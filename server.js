@@ -854,7 +854,7 @@ app.post('/api/bid', async (req, res) => {
     // get current price and start price
     const r = await pool.request()
       .input('pid', sql.Int, pid)
-      .query('SELECT GiaHienTai, GiaKhoiDiem FROM Product WHERE MaProduct=@pid');
+      .query('SELECT GiaHienTai, GiaKhoiDiem, TenProduct FROM Product WHERE MaProduct=@pid');
     
     if (!r.recordset.length) {
       return res.status(404).json({ 
@@ -865,6 +865,7 @@ app.post('/api/bid', async (req, res) => {
     
     const row = r.recordset[0];
     const current = row.GiaHienTai != null ? parseFloat(row.GiaHienTai) : parseFloat(row.GiaKhoiDiem);
+    const tenProduct = row.TenProduct || 'Sản phẩm';
 
     if (bid <= current) {
       return res.json({ 
@@ -914,8 +915,11 @@ app.post('/api/bid', async (req, res) => {
     io.emit('productsChanged');
     io.emit('newBid', { 
       productId: pid, 
-      bidder: tenNguoiDauGia, 
+      bidder: tenNguoiDauGia,
+      tenNguoiDauGia: tenNguoiDauGia,
       amount: bid,
+      giaHienTai: bid,
+      tenProduct: tenProduct,
       ip: clientIP
     });
     

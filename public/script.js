@@ -48,7 +48,7 @@ async function loadProducts(){
     const products = await res.json();
     const section = document.getElementById('products');
     
-    // Clear existing products
+  // Clear existing products
     section.innerHTML = '';
     
     // Lấy thời gian đấu giá
@@ -109,13 +109,13 @@ async function loadProducts(){
       h3.textContent = p.TenProduct || 'Sản phẩm';
       
       const pStart = document.createElement('p');
-      pStart.innerHTML = `<b>Giá khởi điểm:</b> ${p.GiaKhoiDiem != null ? Number(p.GiaKhoiDiem).toLocaleString() : 'N/A'}`;
+      pStart.innerHTML = `<b>Giá khởi điểm:</b> <span class="value">${p.GiaKhoiDiem != null ? Number(p.GiaKhoiDiem).toLocaleString() : 'N/A'}</span>`;
       
       const pCurrent = document.createElement('p');
-      pCurrent.innerHTML = `<b>Giá hiện tại:</b> ${p.GiaHienTai != null ? Number(p.GiaHienTai).toLocaleString() : Number(p.GiaKhoiDiem).toLocaleString()}`;
+      pCurrent.innerHTML = `<b>Giá hiện tại:</b> <span class="value">${p.GiaHienTai != null ? Number(p.GiaHienTai).toLocaleString() : Number(p.GiaKhoiDiem).toLocaleString()}</span>`;
       
       const pBidder = document.createElement('p');
-      pBidder.innerHTML = `<b>Người đấu giá:</b> ${p.TenNguoiDauGia || 'Chưa có'}`;
+      pBidder.innerHTML = `<b>Người đấu giá:</b> <span class="value">${p.TenNguoiDauGia || 'Chưa có'}</span>`;
       
       // Tạo div chứa 2 nút
       const cardButtons = document.createElement('div');
@@ -161,6 +161,21 @@ async function loadProducts(){
     if (totalEl) {
       totalEl.textContent = 'Tổng Giá Hiện Tại: ' + total.toLocaleString() + ' VNĐ';
     }
+
+    // Sau khi render xong, nếu có yêu cầu cuộn tới sản phẩm đã đấu giá thì thực hiện
+    try {
+      const scrollTargetId = localStorage.getItem('scrollTargetProductId');
+      if (scrollTargetId) {
+        const targetCard = document.querySelector(`.card[data-product-id="${scrollTargetId}"]`);
+        if (targetCard) {
+          targetCard.scrollIntoView({ behavior: 'instant', block: 'center' });
+          // Thêm hiệu ứng highlight ngắn để người dùng nhận biết
+          targetCard.classList.add('flash-highlight');
+          setTimeout(() => targetCard.classList.remove('flash-highlight'), 1600);
+        }
+        localStorage.removeItem('scrollTargetProductId');
+      }
+    } catch (_) { /* ignore */ }
   } catch (err) {
     console.error('Error loading products:', err);
   } finally {
@@ -330,6 +345,14 @@ function initSocketConnection() {
   socket.on('newBid', (data) => {
     console.log('💰 New bid event received:', data);
     loadProducts();
+    
+    // Hiển thị toast notification
+    if (data && data.tenNguoiDauGia && data.giaHienTai && data.tenProduct) {
+      showToast(
+        '💰 Đấu giá mới!',
+        `<strong class="toast-highlight">${data.tenNguoiDauGia}</strong> vừa đấu giá <strong class="toast-price">${Number(data.giaHienTai).toLocaleString()} VNĐ</strong> cho "${data.tenProduct}"`
+      );
+    }
   });
   
   socket.on('auctionTimeUpdated', (data) => {
@@ -383,19 +406,59 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Khởi tạo image zoom modal
   initImageZoom();
+  
+  // Thêm format số tiền cho input bidAmount
+  const bidAmountInput = document.getElementById('bidAmount');
+  if (bidAmountInput) {
+    bidAmountInput.addEventListener('input', function(e) {
+      // Lấy giá trị và loại bỏ tất cả ký tự không phải số
+      let value = e.target.value.replace(/\D/g, '');
+      
+      // Nếu có giá trị, format với dấu phân cách hàng nghìn
+      if (value) {
+        e.target.value = parseInt(value).toLocaleString('en-US');
+      } else {
+        e.target.value = '';
+      }
+    });
+    
+    // Lưu giá trị thực khi focus out để dễ parse
+    bidAmountInput.addEventListener('blur', function(e) {
+      const value = e.target.value.replace(/\D/g, '');
+      e.target.dataset.rawValue = value;
+    });
+  }
+
+  // Chuẩn hoá nhập tên người đấu giá: "dd" hoặc "dđ" => "đ" (giữ nguyên phần còn lại)
+  const bidNameInput = document.getElementById('bidName');
+  if (bidNameInput) {
+    bidNameInput.addEventListener('input', function(e) {
+      let v = e.target.value;
+      // Thay các tổ hợp sai thành đúng theo kiểu gõ Telex
+      v = v
+        .replace(/dđ/g, 'đ')
+        .replace(/dd/g, 'đ')
+        .replace(/DĐ/g, 'Đ')
+        .replace(/DD/g, 'Đ');
+      e.target.value = v;
+    });
+  }
 });
 
 async function submitBid(){
   const modal = document.getElementById('bidModal');
   const id = modal.dataset.id;
   const name = document.getElementById('bidName').value.trim();
-  const amount = parseFloat(document.getElementById('bidAmount').value);
+  const amountInput = document.getElementById('bidAmount');
+  // Lấy giá trị thực từ input, loại bỏ dấu phân cách
+  const amount = parseFloat(amountInput.value.replace(/,/g, ''));
   const current = parseFloat(modal.dataset.current);
 
   if(!name){
     alert('Vui lòng nhập tên!');
     return;
   }
+  
   if(!amount || amount <= current){
     alert('Giá đấu phải lớn hơn giá hiện tại!');
     return;
@@ -416,6 +479,8 @@ async function submitBid(){
     
     if (result.success) {
       alert('✅ Đấu giá thành công!');
+      // Lưu lại sản phẩm vừa đấu giá để khôi phục vị trí cuộn sau khi trang cập nhật/reload
+      try { localStorage.setItem('scrollTargetProductId', id); } catch (_) {}
       closeBid();
       // Không cần gọi loadProducts() ở đây vì Socket.IO sẽ tự động cập nhật
     } else {
@@ -696,4 +761,31 @@ if (editBtns && editBtns.length > 0) {
 const closeEditBtn = document.querySelector('#editModal .detail-close-btn');
 if (closeEditBtn) {
   closeEditBtn.addEventListener('click', closeEditModal);
+}
+
+// ========== TOAST NOTIFICATION ==========
+function showToast(title, message) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  
+  // Tạo toast element
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  
+  toast.innerHTML = `
+    <div class="toast-icon">🔔</div>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Tự động xóa sau 5 giây
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 5000);
 }
